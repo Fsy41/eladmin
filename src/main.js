@@ -7,8 +7,10 @@ import './plugins/element.js'
 import './assets/styles/index.scss'
 import request from '@/utils/request'
 import '@/assets/icons/index'
+import permission from "@/components/Permission";
 
 Vue.config.productionTip = false
+Vue.use(permission)
 Vue.prototype.$request = request
 
 new Vue({

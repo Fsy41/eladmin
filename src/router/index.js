@@ -20,6 +20,11 @@ const routes = [
         path:'system/user',
         name: 'User',
         component:()=> import('@/views/system/user')
+      },
+      {
+        path:'system/role',
+        name: 'Role',
+        component:()=> import('@/views/system/role')
       }
     ]
   }

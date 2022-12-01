@@ -46,7 +46,7 @@ import Background from '@/assets/images/background.webp'
 import { encrypt } from '@/utils/rsaEncrypt'
 import Cookies from 'js-cookie'
 import Config from '@/settings'
-import {setToken} from "@/utils/auth";
+import {getCodeImg} from "@/api/login";
 export default {
   name: "Login",
   data(){
@@ -91,7 +91,7 @@ export default {
     },
     getCode(){
       //发送请求给后端，需要用到axios
-      this.$request.get('http://localhost:8000/auth/code').then(res=>{
+      getCodeImg().then(res=>{
         this.codeUrl = res.data.img
         this.loginForm.uuid = res.data.uuid
       })
@@ -109,7 +109,6 @@ export default {
           user.password = encrypt(user.password)
         }
         if (valid){
-          this.loading = true
           if (user.rememberMe) {
             Cookies.set('username', user.username, { expires: Config.passCookieExpires })
             Cookies.set('password', user.password, { expires: Config.passCookieExpires })
@@ -119,8 +118,9 @@ export default {
             Cookies.remove('password')
             Cookies.remove('rememberMe')
           }
-          this.$request.post('http://localhost:8000/auth/login',user).then(res =>{
-            setToken(res.data.token, this.loginForm.rememberMe)
+          this.loading = true
+          this.$store.dispatch('Login',user).then(res =>{
+            // setToken(res.data.token, this.loginForm.rememberMe)
             this.$router.push('/')
           })
         } else {

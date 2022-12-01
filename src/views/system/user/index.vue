@@ -5,9 +5,12 @@
       <div class="crud-opts"><span class="crud-opts-left">
         <!--左侧插槽-->
         <slot name="left"/>
-        <el-button class="filter-item" size="mini" type="primary" icon="el-icon-plus"  @click="updateOperation('post')">新增</el-button>
-        <el-button class="filter-item" size="mini" type="success" icon="el-icon-edit"  :disabled="selectData.length !== 1"  @click="updateOperation('put')">修改</el-button>
-        <el-button slot="reference" class="filter-item" type="danger" icon="el-icon-delete" size="mini" :disabled="selectData.length === 0" @click="updateOperation('delete')">删除</el-button>
+        <el-button class="filter-item" size="mini" type="primary" icon="el-icon-plus"
+                   v-permission="['user:add']" @click="updateOperation('post')">新增</el-button>
+        <el-button class="filter-item" size="mini" type="success" icon="el-icon-edit"
+                   v-permission="['user:edit']" :disabled="selectData.length !== 1"  @click="updateOperation('put')">修改</el-button>
+        <el-button slot="reference" class="filter-item" type="danger" icon="el-icon-delete" size="mini"
+                   v-permission="['user:del']" :disabled="selectData.length === 0" @click="updateOperation('delete')">删除</el-button>
         <el-button class="filter-item" size="mini" type="warning" icon="el-icon-download">导出</el-button>
         <!--右侧-->
         <slot name="right"/></span>
@@ -141,10 +144,22 @@
 
 <script>
 import Element from 'element-ui'
+import store from "@/store"
 export default {
   name: "User",
   created() {
     this.getUserInfo()
+    store.dispatch('GetInfo').then(() => {
+      console.log('获取用户信息成功！！！！')
+    })
+    //在页面加载时读取sessionStorage里的状态信息，解决页面刷新时vuex会清空的问题
+    if (sessionStorage.getItem('store')) {
+      this.$store.replaceState(JSON.parse(sessionStorage.getItem('store')));
+    }
+    //在页面刷新时将vuex里的信息保存到sessionStorage里
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem('store', JSON.stringify(this.$store.state));
+    })
   },
   data() {
     return {

@@ -54,8 +54,7 @@ export default {
   methods:{
     logout(){
       //请求后端接口删除该用户的token，同时前端Cookies也要删除该用户的token
-      this.$request.delete('http://localhost:8000/auth/logout').then(res => {
-        removeToken(Config.TokenKey)
+      this.$store.dispatch('LogOut').then(() => {
         this.$router.replace('/login')
       })
     },
