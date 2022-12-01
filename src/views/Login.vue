@@ -92,8 +92,8 @@ export default {
     getCode(){
       //发送请求给后端，需要用到axios
       getCodeImg().then(res=>{
-        this.codeUrl = res.data.img
-        this.loginForm.uuid = res.data.uuid
+        this.codeUrl = res.img
+        this.loginForm.uuid = res.uuid
       })
     },
     handleLogin(){
@@ -120,7 +120,6 @@ export default {
           }
           this.loading = true
           this.$store.dispatch('Login',user).then(res =>{
-            // setToken(res.data.token, this.loginForm.rememberMe)
             this.$router.push('/')
           })
         } else {

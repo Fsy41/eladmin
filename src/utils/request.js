@@ -10,7 +10,7 @@ let request = axios.create({
 
 //添加响应拦截器
 request.interceptors.response.use(response => {
-        return response
+        return response.data
     },
     error => {
         Element.Message.error('请求失败' + error)

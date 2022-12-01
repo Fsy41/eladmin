@@ -104,6 +104,7 @@
             <el-radio
                 v-for="item in user_status"
                 :label="item.value"
+                :key="item.label"
             >{{ item.label }}
             </el-radio>
           </el-radio-group>
@@ -198,9 +199,9 @@ export default {
   },
   methods:{
     getUserInfo(){
-      this.$request.get('http://localhost:8000/api/users').then(res=>{
+      this.$request.get('api/users').then(res=>{
         console.log(res)
-        this.tableData = res.data.content
+        this.tableData = res.content
       })},
     //让选中的数据显示到框框里面
     mapForm(selectRow){
@@ -217,7 +218,7 @@ export default {
     updateUser(data) {
       let op = this.$store.state.operation
       console.log("form的数据", this.form)
-      this.$request({url: 'http://localhost:8000/api/users', method: op, data: data}).then(res => {
+      this.$request({url: 'api/users', method: op, data: data}).then(() => {
         Element.Message.success(op+'用户成功')
         this.dialogFormVisible = false
         this.getUserInfo()
@@ -245,8 +246,8 @@ export default {
     loadDept(node, resolve) {
       //pid代表上级部门的id
       let pid = node.level === 0 ? null : node.data.id
-      this.$request.get('http://localhost:8000/api/dept', {params: {enable: true, pid}}).then(res => {
-        this.depts = res.data.content
+      this.$request.get('api/dept', {params: {enable: true, pid}}).then(res => {
+        this.depts = res.content
         resolve(this.depts);
       })
     },
@@ -260,11 +261,11 @@ export default {
     },
     //获取树形组件中的岗位和角色信息
     getJobAndRole() {
-      this.$request.get('http://localhost:8000/api/job?page=0&size=9999&enabled=true').then(res => {
-        this.jobs = res.data.content
+      this.$request.get('api/job?page=0&size=9999&enabled=true').then(res => {
+        this.jobs = res.content
       })
-      this.$request.get('http://localhost:8000/api/roles/all').then(res => {
-        this.roles = res.data
+      this.$request.get('api/roles/all').then(res => {
+        this.roles = res
       })
     }
   }
