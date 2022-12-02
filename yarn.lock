@@ -3211,6 +3211,11 @@
   dependencies:
     "execa" "^5.0.0"
 
+"default-passive-events@^2.0.0":
+  "integrity" "sha512-eMtt76GpDVngZQ3ocgvRcNCklUMwID1PaNbCNxfpDXuiOXttSh0HzBbda1HU9SIUsDc02vb7g9+3I5tlqe/qMQ=="
+  "resolved" "https://registry.npmmirror.com/default-passive-events/-/default-passive-events-2.0.0.tgz"
+  "version" "2.0.0"
+
 "defaults@^1.0.3":
   "integrity" "sha512-eFuaLoy/Rxalv2kr+lqMlUnrDWV+3j4pljOIJgLIhI058IQfWJ7vXhyEIHu+HtC738klGALYxOKDO0bQP3tg8A=="
   "resolved" "https://registry.npmmirror.com/defaults/-/defaults-1.0.4.tgz"
