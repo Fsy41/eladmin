@@ -27,6 +27,7 @@
       </div>
     </div>
     <el-table
+        v-loading="loading"
         :data="tableData"
         border
         style="width: 100%" @selection-change="handleSelectionChange">
@@ -78,6 +79,16 @@
         </template>
       </el-table-column>
     </el-table>
+    <!--分页-->
+    <el-pagination
+        :page-size.sync="page.size"
+        :total="page.total"
+        :current-page.sync="page.page"
+        style="margin-top: 8px;"
+        layout="total, prev, pager, next, sizes"
+        @size-change="sizeChangeHandler"
+        @current-change="pageChangeHandler"
+    />
     <!--用户信息编辑弹窗-->
     <el-dialog append-to-body title="用户信息" :visible.sync="dialogFormVisible" width="680px">
       <el-form :model="form" :inline="true" size="small" label-width="66px">
@@ -150,6 +161,7 @@ export default {
   name: "User",
   created() {
     this.getUserInfo()
+    this.initForm()
     store.dispatch('GetInfo').then(() => {
       console.log('获取用户信息成功！！！！')
     })
@@ -161,9 +173,20 @@ export default {
     window.addEventListener('beforeunload', () => {
       sessionStorage.setItem('store', JSON.stringify(this.$store.state));
     })
+    this.page.page = 1
+    this.page.size = 10
   },
   data() {
     return {
+      loading: false,
+      page: {
+        // 页码
+        page: 0,
+        // 每页数据条数
+        size: 10,
+        // 总数据条数
+        total: 0
+      },
       selectData:[],
       jobDatas:[],
       roleDatas: [],
@@ -179,30 +202,53 @@ export default {
       depts: [],
       dialogFormVisible: false,
       tableData: [],
-      form: {
-        username: 'testJeff520',
-        email: '786500545@qq.com',
+      form: {}
+    }
+  },
+  methods:{
+    // 预防删除当前页最后一条数据时，或者多选删除第二页的数据时，页码错误导致请求无数据
+    dleChangePage() {
+      if (this.tableData.length === 1 && this.page.page !== 1) {
+        this.page.page -= 1
+      }
+    },
+    // 每页条数改变
+    sizeChangeHandler(size) {
+      this.page.size = size
+      this.page.page = 1
+      this.getUserInfo()
+    },
+    // 当前页改变
+    pageChangeHandler(page) {
+      this.page.page = page
+      this.getUserInfo()
+    },
+    initForm(){
+      this.form = {
+        username: 'user' + Math.round(Math.random() * 10000),
+        email: Math.round(Math.random() * 100000000) + '@qq.com',
         dept: {id: 7},
-        nickName: 'houky',
+        nickName: 'fan3',
         id: null,
-        phone: 13242842112,
+        phone: 13242000000 + Math.round(Math.random() * 1000000),
         roles: [{id: 2}],
         enabled: true,
         gender: '男',
         jobs: [],
-        //以下是修改用户信息才需要传给后端的，新增的时候不用
-        createTime: "2021-08-17 20:00:35",
-        createBy: "admin",
-        updateTime: "2021-08-17 20:05:45"
       }
-    }
-  },
-  methods:{
+      this.deptData = '研发部'
+      this.roleDatas = [2]
+      this.jobDatas = [11]
+    },
     getUserInfo(){
-      this.$request.get('api/users').then(res=>{
-        console.log(res)
+      let queryParams = {page: this.page.page - 1, size: this.page.size}
+      this.loading = true
+      this.$request.get('api/users', {params: queryParams}).then(res => {
         this.tableData = res.content
-      })},
+        this.page.total = res.totalElements
+        this.loading = false
+      })
+    },
     //让选中的数据显示到框框里面
     mapForm(selectRow){
       this.deptData = selectRow.dept.name
@@ -253,11 +299,15 @@ export default {
     },
     //点击新增或编辑或删除按钮时
     updateOperation(op) {
+      if (op === 'post') this.initForm()
       if (op == 'put') this.mapForm(this.selectData[0])
       this.$store.commit('SET_OP', op)
       this.dialogFormVisible = op !=='delete'
       if (op !=='delete') this.getJobAndRole()
-      else this.updateUser(this.selectData.map(value=>value.id))
+      else {
+        this.dleChangePage()
+        this.updateUser(this.selectData.map(value => value.id))
+      }
     },
     //获取树形组件中的岗位和角色信息
     getJobAndRole() {

@@ -95,6 +95,7 @@
             <span class="role-span">角色列表</span>
           </div>
           <el-table
+              v-loading="loading"
               :data="tableData"
               style="width: 100%"
               @selection-change="handleSelectionChange"
@@ -131,6 +132,16 @@
                 label="创建日期">
             </el-table-column>
           </el-table>
+          <!--分页-->
+          <el-pagination
+              :page-size.sync="page.size"
+              :total="page.total"
+              :current-page.sync="page.page"
+              style="margin-top: 8px;"
+              layout="total, prev, pager, next, sizes"
+              @size-change="sizeChangeHandler"
+              @current-change="pageChangeHandler"
+          />
         </el-card>
       </el-col>
 
@@ -236,6 +247,8 @@ export default {
       }
     })
     this.initForm()
+    this.page.page = 1
+    this.page.size = 10
   },
   data() {
     return {
@@ -256,10 +269,36 @@ export default {
         label: 'title', //定义显示的变量名
         isLeaf: 'leaf',
       },
-      form: {}
+      form: {},
+      loading: false,
+      page: {
+        // 页码
+        page: 0,
+        // 每页数据条数
+        size: 10,
+        // 总数据条数
+        total: 0
+      },
     }
   },
   methods: {
+    // 预防删除当前页最后一条数据时，或者多选删除第二页的数据时，页码错误导致请求无数据
+    dleChangePage() {
+      if (this.tableData.length === 1 && this.page.page !== 1) {
+        this.page.page -= 1
+      }
+    },
+    // 每页条数改变
+    sizeChangeHandler(size) {
+      this.page.size = size
+      this.page.page = 1
+      this.getRoleList()
+    },
+    // 当前页改变
+    pageChangeHandler(page) {
+      this.page.page = page
+      this.getRoleList()
+    },
     initForm() {
       //点击新增角色按钮时, 随机生成预设值
       this.form = {
@@ -415,9 +454,10 @@ export default {
         })
       }else if (op === 'delete'){
         let ids = this.selectData.map(value => value.id)
-        del(ids).then(res=>{
-          this.getRoleList()
+        del(ids).then(()=>{
           Element.Message.success('删除成功')
+          this.dleChangePage()
+          this.getRoleList()
         })
       }
       if (op!=='delete'){
@@ -425,8 +465,12 @@ export default {
       }
     },
     getRoleList() {
-      this.$request.get('api/roles/all').then(res => {
-        this.tableData = res
+      let queryParams = {page: this.page.page - 1, size: this.page.size}
+      this.loading = true
+      this.$request.get('api/roles', {params: queryParams}).then(res => {
+        this.tableData = res.content
+        this.page.total = res.totalElements
+        this.loading = false
       })
     }
   }
