@@ -36,7 +36,9 @@
                type="danger"
                icon="el-icon-delete"
                size="mini"
+               :disabled="selectData.length === 0"
                v-permission="['roles:del']"
+               @click="updateOperation('delete')"
            >
              删除
            </el-button>
@@ -217,6 +219,7 @@ import {getDepts,getDeptSuperior} from "@/api/dept";
 import {LOAD_CHILDREN_OPTIONS} from '@riophae/vue-treeselect'
 import Element from "element-ui";
 import {getChild} from "@/api/menu";
+import {del} from "@/api/role";
 export default {
   name: "Role",
   components: {Treeselect},
@@ -410,8 +413,16 @@ export default {
           this.buildDepts(depts)
           this.depts = depts
         })
+      }else if (op === 'delete'){
+        let ids = this.selectData.map(value => value.id)
+        del(ids).then(res=>{
+          this.getRoleList()
+          Element.Message.success('删除成功')
+        })
       }
-      this.dialogFormVisible = true
+      if (op!=='delete'){
+        this.dialogFormVisible = true
+      }
     },
     getRoleList() {
       this.$request.get('api/roles/all').then(res => {
